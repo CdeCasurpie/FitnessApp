@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Plan Fitness</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Meta tags para PWA -->
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Plan Fitness">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Plan Fitness">
+    
+    <!-- Iconos para diferentes dispositivos -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    
+    <!-- Meta tags adicionales -->
+    <meta name="description" content="Tu plan personal de fitness y nutrición. Sigue tu progreso diario y alcanza tus objetivos.">
+    <meta name="keywords" content="fitness, ejercicio, nutrición, salud, calorías, entrenamiento">
+    <meta name="author" content="Plan Fitness App">
+    
+    <!-- Prevenir zoom en dispositivos móviles -->
+    <meta name="format-detection" content="telephone=no">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">Plan Fitness</h1>
+                <div class="user-info">
+                    <span class="user-name" id="user-name">Cesar</span>
+                    <div class="user-stats">
+                        <span class="stat" id="user-weight">64.2 kg</span>
+                        <span class="stat" id="user-height">1.65 m</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="today">
+                <div class="nav-icon">
+                    <div class="icon-calendar"></div>
+                </div>
+                <span>Hoy</span>
+            </button>
+            <button class="nav-btn" data-tab="week">
+                <div class="nav-icon">
+                    <div class="icon-chart"></div>
+                </div>
+                <span>Semana</span>
+            </button>
+            <button class="nav-btn" data-tab="config">
+                <div class="nav-icon">
+                    <div class="icon-settings"></div>
+                </div>
+                <span>Config</span>
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="tab-content active" id="today-tab">
+                <div class="today-header">
+                    <div class="date-info">
+                        <h2 class="current-day" id="current-day">Lunes</h2>
+                        <p class="current-date" id="current-date">9 de Agosto, 2025</p>
+                    </div>
+                    <div class="calories-summary">
+                        <div class="calories-item">
+                            <span class="calories-label">Reposo</span>
+                            <span class="calories-value" id="bmr-calories">1580</span>
+                        </div>
+                        <div class="calories-item">
+                            <span class="calories-label">Ejercicio</span>
+                            <span class="calories-value" id="exercise-calories">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Objetivo del día</h3>
+                    <div class="goal-card">
+                        <p id="daily-goal">Activar metabolismo y empezar déficit fuerte.</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Entrenamiento</h3>
+                    <div class="workout-list" id="workout-list"></div>
+                    <div class="workout-summary">
+                        <span>Total: <strong id="total-exercise-calories">0 kcal</strong></span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Mis Comidas</h3>
+                    
+                    <div class="add-meal-form">
+                        <div class="form-row">
+                            <input type="text" id="meal-name" placeholder="Nombre de la comida" class="meal-input">
+                            <input type="number" id="meal-calories" placeholder="kcal" class="meal-input small">
+                            <button class="btn-add-meal" id="add-meal-btn">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="meals-list" id="meals-list"></div>
+                    
+                    <div class="meals-summary">
+                        <div class="summary-item">
+                            <span>Consumo total</span>
+                            <strong id="total-calories-consumed">0 kcal</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Calorías del Día</h3>
+                    <div class="calorie-bar-container">
+                        <div class="calorie-bar">
+                            <div class="calorie-marker" id="calorie-marker"></div>
+                        </div>
+                        <div class="calorie-labels">
+                            <span class="calorie-label left">-1000</span>
+                            <span class="calorie-label center">0</span>
+                            <span class="calorie-label right">+1000</span>
+                        </div>
+                        <div class="calorie-info">
+                            <span id="calorie-status">0 kcal consumidas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="complete-workout">
+                        Completar Entrenamiento
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="week-tab">
+                <div class="week-header">
+                    <h2>Progreso Semanal</h2>
+                    <p>Semana del 4 al 10 de Agosto</p>
+                </div>
+                
+                <div class="week-schedule" id="week-schedule"></div>
+            </div>
+
+            <div class="tab-content" id="config-tab">
+                <div class="config-header">
+                    <h2>Configuración</h2>
+                    <p>Actualiza tu información personal</p>
+                </div>
+
+                <div class="config-section">
+                    <h3>Información Personal</h3>
+                    <div class="config-form">
+                        <div class="input-group">
+                            <label for="config-name">Nombre</label>
+                            <input type="text" id="config-name" value="Cesar">
+                        </div>
+                        <div class="input-group">
+                            <label for="config-weight">Peso (kg)</label>
+                            <input type="number" step="0.1" id="config-weight" value="64.2">
+                        </div>
+                        <div class="input-group">
+                            <label for="config-height">Altura (cm)</label>
+                            <input type="number" id="config-height" value="165">
+                        </div>
+                        <div class="input-group">
+                            <label for="config-age">Edad (años)</label>
+                            <input type="number" id="config-age" value="20">
+                        </div>
+                        <button class="btn btn-primary" id="save-config">Guardar Cambios</button>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Registro de Medidas</h3>
+                    <div class="measurement-buttons">
+                        <button class="btn btn-secondary" onclick="showChart('weight')">Ver Gráfica de Peso</button>
+                        <button class="btn btn-secondary" onclick="showChart('height')">Ver Gráfica de Altura</button>
+                        <button class="btn btn-secondary" onclick="showChart('age')">Ver Gráfica de Edad</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="chart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="chart-title">Gráfica</h3>
+                <button class="modal-close" onclick="closeChart()">×</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="chart-canvas" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Excelente</h3>
+            </div>
+            <div class="modal-body">
+                <p id="success-message">Entrenamiento completado correctamente</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="close-modal">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
