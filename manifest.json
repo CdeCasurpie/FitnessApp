@@ -2,7 +2,7 @@
   "name": "Plan Fitness",
   "short_name": "Fitness",
   "description": "Tu plan personal de fitness y nutrición",
-  "start_url": "/",
+  "start_url": "/FitnessApp/",
   "display": "standalone",
   "background_color": "#FFF8F5",
   "theme_color": "#FF6B35",
