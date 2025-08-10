@@ -1,4 +1,4 @@
-const weeklyPlan = {
+let weeklyPlan = {
     lunes: {
         goal: "Activar metabolismo y empezar déficit fuerte",
         exercises: [
