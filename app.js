@@ -77,6 +77,9 @@ let appData = {
     editingDay: null // Para saber qué día se está editando
 };
 
+// Variable global para manejar la instalación de PWA
+let deferredPrompt;
+
 document.addEventListener('DOMContentLoaded', function() {
     loadStoredData();
     updateUserDisplay();
@@ -400,7 +403,8 @@ function updateEditExercisesList(exercises) {
                 <input type="text" class="exercise-duration" value="${exercise.sets || exercise.duration || ''}" placeholder="Series/Duración">
                 <input type="number" class="exercise-calories" value="${exercise.calories}" placeholder="kcal">
             </div>
-            <button class="btn-delete-exercise" onclick="deleteEditExercise(${index})">×</button>
+            <br>
+            <button class="btn-delete-exercise" onclick="deleteEditExercise(${index})">Eliminar</button>
         </div>
     `).join('');
 }
@@ -416,7 +420,8 @@ function addNewEditExercise() {
                 <input type="text" class="exercise-duration" value="" placeholder="Series/Duración">
                 <input type="number" class="exercise-calories" value="" placeholder="kcal">
             </div>
-            <button class="btn-delete-exercise" onclick="deleteEditExercise(${newIndex})">×</button>
+            <br>
+            <button class="btn-delete-exercise" onclick="deleteEditExercise(${newIndex})">Eliminar</button>
         </div>
     `;
     
@@ -596,7 +601,6 @@ function updateWeeklyView() {
             <div class="day-card ${isToday ? 'today' : ''}" onclick="editDayPlan('${day}')">
                 <div class="day-header">
                     <h3>${capitalizeFirst(day)}</h3>
-                    <span class="edit-indicator">✏️</span>
                 </div>
                 <div class="day-progress">
                     <span class="progress-item ${dayData.exerciseCompleted ? 'completed' : ''}">
@@ -757,30 +761,73 @@ function setupEventListeners() {
         });
     });
     
-    document.getElementById('complete-workout').addEventListener('click', completeAllWorkout);
-    document.getElementById('add-meal-btn').addEventListener('click', addMeal);
-    document.getElementById('save-config').addEventListener('click', saveConfig);
-    document.getElementById('close-modal').addEventListener('click', closeModal);
-    document.getElementById('add-exercise-btn').addEventListener('click', addNewEditExercise);
-    document.getElementById('save-day-plan').addEventListener('click', saveDayPlan);
-    document.getElementById('close-plan-modal').addEventListener('click', closePlanModal);
-    document.getElementById('reset-plan').addEventListener('click', resetWeeklyPlan);
+    const completeWorkoutBtn = document.getElementById('complete-workout');
+    if (completeWorkoutBtn) {
+        completeWorkoutBtn.addEventListener('click', completeAllWorkout);
+    }
     
-    document.getElementById('meal-name').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('meal-calories').focus();
-        }
-    });
+    const addMealBtn = document.getElementById('add-meal-btn');
+    if (addMealBtn) {
+        addMealBtn.addEventListener('click', addMeal);
+    }
     
-    document.getElementById('meal-calories').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            addMeal();
-        }
-    });
+    const saveConfigBtn = document.getElementById('save-config');
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', saveConfig);
+    }
     
-    document.getElementById('user-name').addEventListener('click', function() {
-        switchTab('config');
-    });
+    const closeModalBtn = document.getElementById('close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    
+    const addExerciseBtn = document.getElementById('add-exercise-btn');
+    if (addExerciseBtn) {
+        addExerciseBtn.addEventListener('click', addNewEditExercise);
+    }
+    
+    const saveDayPlanBtn = document.getElementById('save-day-plan');
+    if (saveDayPlanBtn) {
+        saveDayPlanBtn.addEventListener('click', saveDayPlan);
+    }
+    
+    const closePlanModalBtn = document.getElementById('close-plan-modal');
+    if (closePlanModalBtn) {
+        closePlanModalBtn.addEventListener('click', closePlanModal);
+    }
+    
+    const resetPlanBtn = document.getElementById('reset-plan');
+    if (resetPlanBtn) {
+        resetPlanBtn.addEventListener('click', resetWeeklyPlan);
+    }
+    
+    const mealNameInput = document.getElementById('meal-name');
+    if (mealNameInput) {
+        mealNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const mealCaloriesInput = document.getElementById('meal-calories');
+                if (mealCaloriesInput) {
+                    mealCaloriesInput.focus();
+                }
+            }
+        });
+    }
+    
+    const mealCaloriesInput = document.getElementById('meal-calories');
+    if (mealCaloriesInput) {
+        mealCaloriesInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addMeal();
+            }
+        });
+    }
+    
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement) {
+        userNameElement.addEventListener('click', function() {
+            switchTab('config');
+        });
+    }
 }
 
 // Hacer funciones globales para que funcionen desde onclick
@@ -887,7 +934,6 @@ function registerServiceWorker() {
     }
     
     // Manejar evento de instalación de PWA
-    let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -931,7 +977,6 @@ function hideInstallButton() {
 }
 
 function installApp() {
-    const installButton = document.getElementById('install-button');
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {

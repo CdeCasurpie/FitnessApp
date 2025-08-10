@@ -750,11 +750,14 @@ h4 { font-size: 1.1rem; }
     background: var(--surface-color);
     max-width: 320px;
     width: 90%;
+    max-height: 80vh;
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal.show .modal-content {
@@ -878,6 +881,8 @@ h4 { font-size: 1.1rem; }
 
 .edit-plan-body {
     padding: var(--spacing-lg) !important;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .exercises-section {
@@ -925,13 +930,13 @@ h4 { font-size: 1.1rem; }
 }
 
 .btn-delete-exercise {
-    width: 28px;
-    height: 28px;
     background: var(--error-color);
     color: white;
     border: none;
-    border-radius: 50%;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-top: var(--spacing-xs);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -999,4 +1004,34 @@ h4 { font-size: 1.1rem; }
 
 .modal-footer .btn {
     flex: 1;
+}
+
+/* Global elegant scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 53, 0.3);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 107, 53, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox scrollbar styling */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 107, 53, 0.3) transparent;
 }
