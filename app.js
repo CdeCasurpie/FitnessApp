@@ -65,14 +65,16 @@ const weeklyPlan = {
 
 let appData = {
     userInfo: {
-        name: "Cesar",
+        name: "Nombre",
         weight: 64.2,
         height: 165,
         age: 20
     },
     dailyMeals: {},
     exerciseProgress: {},
-    userHistory: []
+    userHistory: [],
+    customWeeklyPlan: null, // Para almacenar el plan personalizado
+    editingDay: null // Para saber qué día se está editando
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -86,11 +88,19 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadStoredData() {
     const stored = localStorage.getItem('fitnessAppData');
     if (stored) {
-        appData = { ...appData, ...JSON.parse(stored) };
+        const loadedData = JSON.parse(stored);
+        appData = { ...appData, ...loadedData };
+        
+        // Si hay un plan personalizado guardado, usarlo
+        if (appData.customWeeklyPlan) {
+            weeklyPlan = appData.customWeeklyPlan;
+        }
     }
 }
 
 function saveData() {
+    // Guardar también el plan de ejercicios personalizado
+    appData.customWeeklyPlan = weeklyPlan;
     localStorage.setItem('fitnessAppData', JSON.stringify(appData));
 }
 
@@ -365,6 +375,214 @@ function completeAllWorkout() {
     showSuccessMessage('¡Entrenamiento completo! Excelente trabajo.');
 }
 
+function editDayPlan(dayName) {
+    appData.editingDay = dayName;
+    const dayPlan = weeklyPlan[dayName];
+    
+    // Rellenar el formulario con los datos actuales
+    document.getElementById('edit-day-name').textContent = capitalizeFirst(dayName);
+    document.getElementById('edit-goal').value = dayPlan.goal;
+    
+    // Mostrar los ejercicios actuales
+    updateEditExercisesList(dayPlan.exercises);
+    
+    // Mostrar el modal de edición
+    document.getElementById('edit-plan-modal').classList.add('show');
+}
+
+function updateEditExercisesList(exercises) {
+    const container = document.getElementById('edit-exercises-list');
+    
+    container.innerHTML = exercises.map((exercise, index) => `
+        <div class="edit-exercise-item">
+            <div class="exercise-inputs">
+                <input type="text" class="exercise-name" value="${exercise.name}" placeholder="Nombre del ejercicio">
+                <input type="text" class="exercise-duration" value="${exercise.sets || exercise.duration || ''}" placeholder="Series/Duración">
+                <input type="number" class="exercise-calories" value="${exercise.calories}" placeholder="kcal">
+            </div>
+            <button class="btn-delete-exercise" onclick="deleteEditExercise(${index})">×</button>
+        </div>
+    `).join('');
+}
+
+function addNewEditExercise() {
+    const container = document.getElementById('edit-exercises-list');
+    const newIndex = container.children.length;
+    
+    const newExerciseHtml = `
+        <div class="edit-exercise-item">
+            <div class="exercise-inputs">
+                <input type="text" class="exercise-name" value="" placeholder="Nombre del ejercicio">
+                <input type="text" class="exercise-duration" value="" placeholder="Series/Duración">
+                <input type="number" class="exercise-calories" value="" placeholder="kcal">
+            </div>
+            <button class="btn-delete-exercise" onclick="deleteEditExercise(${newIndex})">×</button>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', newExerciseHtml);
+}
+
+function deleteEditExercise(index) {
+    const container = document.getElementById('edit-exercises-list');
+    if (container.children[index]) {
+        container.children[index].remove();
+        // Reindexar los botones de eliminar
+        Array.from(container.children).forEach((item, newIndex) => {
+            const deleteBtn = item.querySelector('.btn-delete-exercise');
+            deleteBtn.setAttribute('onclick', `deleteEditExercise(${newIndex})`);
+        });
+    }
+}
+
+function saveDayPlan() {
+    if (!appData.editingDay) return;
+    
+    const dayName = appData.editingDay;
+    const goal = document.getElementById('edit-goal').value.trim();
+    
+    if (!goal) {
+        showSuccessMessage('Por favor ingresa un objetivo para el día');
+        return;
+    }
+    
+    // Recopilar ejercicios
+    const exerciseItems = document.querySelectorAll('.edit-exercise-item');
+    const exercises = [];
+    let totalCalories = 0;
+    
+    exerciseItems.forEach(item => {
+        const name = item.querySelector('.exercise-name').value.trim();
+        const duration = item.querySelector('.exercise-duration').value.trim();
+        const calories = parseInt(item.querySelector('.exercise-calories').value) || 0;
+        
+        if (name && duration && calories > 0) {
+            const exercise = {
+                name: name,
+                calories: calories
+            };
+            
+            // Determinar si es duración o sets
+            if (duration.includes('min') || duration.includes('seg')) {
+                exercise.duration = duration;
+            } else {
+                exercise.sets = duration;
+            }
+            
+            exercises.push(exercise);
+            totalCalories += calories;
+        }
+    });
+    
+    if (exercises.length === 0) {
+        showSuccessMessage('Agrega al menos un ejercicio válido');
+        return;
+    }
+    
+    // Guardar el plan actualizado
+    weeklyPlan[dayName] = {
+        goal: goal,
+        exercises: exercises,
+        totalExercise: totalCalories
+    };
+    
+    saveData();
+    closePlanModal();
+    
+    // Actualizar la vista si estamos en el día actual
+    if (getCurrentDay() === dayName) {
+        updateCurrentDay();
+    }
+    
+    // Actualizar vista semanal si está activa
+    if (document.getElementById('week-tab').classList.contains('active')) {
+        updateWeeklyView();
+    }
+    
+    showSuccessMessage(`Plan de ${capitalizeFirst(dayName)} actualizado correctamente`);
+}
+
+function closePlanModal() {
+    document.getElementById('edit-plan-modal').classList.remove('show');
+    appData.editingDay = null;
+}
+
+function resetWeeklyPlan() {
+    if (confirm('¿Estás seguro de que quieres restaurar el plan de ejercicios predeterminado? Se perderán todas las personalizaciones.')) {
+        // Restaurar plan predeterminado
+        weeklyPlan = {
+            lunes: {
+                goal: "Activar metabolismo y empezar déficit fuerte",
+                exercises: [
+                    { name: "Saltar la cuerda", duration: "15 min", calories: 180 },
+                    { name: "Sentadillas con peso corporal", sets: "3x20", calories: 50 },
+                    { name: "Plancha", sets: "3x1 min", calories: 15 }
+                ],
+                totalExercise: 245
+            },
+            martes: {
+                goal: "Mantener déficit y trabajar abdomen",
+                exercises: [
+                    { name: "HIIT", duration: "10 min", calories: 100 },
+                    { name: "Abdominales bicicleta", sets: "3x20", calories: 40 },
+                    { name: "Mountain climbers", sets: "3x30 seg", calories: 25 }
+                ],
+                totalExercise: 165
+            },
+            miercoles: {
+                goal: "Trabajar fuerza y core",
+                exercises: [
+                    { name: "Flexiones", sets: "4x10", calories: 60 },
+                    { name: "Sentadillas", sets: "3x20", calories: 50 },
+                    { name: "Plancha lateral", sets: "3x30 seg", calories: 15 },
+                    { name: "Caminata rápida", duration: "20 min", calories: 80 }
+                ],
+                totalExercise: 205
+            },
+            jueves: {
+                goal: "Mayor quema cardiovascular",
+                exercises: [
+                    { name: "Saltar cuerda", duration: "20 min", calories: 240 },
+                    { name: "Abdominales cortos", sets: "3x30", calories: 45 }
+                ],
+                totalExercise: 285
+            },
+            viernes: {
+                goal: "Trabajar resistencia y fuerza",
+                exercises: [
+                    { name: "Caminata rápida", duration: "25 min", calories: 100 },
+                    { name: "Flexiones", sets: "4x10", calories: 60 },
+                    { name: "Sentadillas", sets: "3x20", calories: 50 }
+                ],
+                totalExercise: 210
+            },
+            sabado: {
+                goal: "Día más intenso para compensar",
+                exercises: [
+                    { name: "HIIT", duration: "15 min", calories: 150 },
+                    { name: "Saltar cuerda", duration: "10 min", calories: 120 },
+                    { name: "Plancha", sets: "3x1 min", calories: 15 }
+                ],
+                totalExercise: 285
+            },
+            domingo: {
+                goal: "Descanso activo",
+                exercises: [
+                    { name: "Caminata suave", duration: "30 min", calories: 100 },
+                    { name: "Abdominales cortos", sets: "3x30", calories: 45 }
+                ],
+                totalExercise: 145
+            }
+        };
+        
+        appData.customWeeklyPlan = null;
+        saveData();
+        updateCurrentDay();
+        updateWeeklyView();
+        showSuccessMessage('Plan de ejercicios restaurado al predeterminado');
+    }
+}
+
 function updateWeeklyView() {
     const container = document.getElementById('week-schedule');
     const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
@@ -375,9 +593,10 @@ function updateWeeklyView() {
         const isToday = day === today;
         
         return `
-            <div class="day-card ${isToday ? 'today' : ''}">
+            <div class="day-card ${isToday ? 'today' : ''}" onclick="editDayPlan('${day}')">
                 <div class="day-header">
                     <h3>${capitalizeFirst(day)}</h3>
+                    <span class="edit-indicator">✏️</span>
                 </div>
                 <div class="day-progress">
                     <span class="progress-item ${dayData.exerciseCompleted ? 'completed' : ''}">
@@ -386,6 +605,9 @@ function updateWeeklyView() {
                     <span class="progress-item ${dayData.hasDeficit ? 'completed' : ''}">
                         Déficit: ${dayData.hasDeficit ? 'Logrado' : 'Pendiente'}
                     </span>
+                </div>
+                <div class="day-goal">
+                    <small>${weeklyPlan[day].goal}</small>
                 </div>
             </div>
         `;
@@ -539,6 +761,10 @@ function setupEventListeners() {
     document.getElementById('add-meal-btn').addEventListener('click', addMeal);
     document.getElementById('save-config').addEventListener('click', saveConfig);
     document.getElementById('close-modal').addEventListener('click', closeModal);
+    document.getElementById('add-exercise-btn').addEventListener('click', addNewEditExercise);
+    document.getElementById('save-day-plan').addEventListener('click', saveDayPlan);
+    document.getElementById('close-plan-modal').addEventListener('click', closePlanModal);
+    document.getElementById('reset-plan').addEventListener('click', resetWeeklyPlan);
     
     document.getElementById('meal-name').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -556,6 +782,10 @@ function setupEventListeners() {
         switchTab('config');
     });
 }
+
+// Hacer funciones globales para que funcionen desde onclick
+window.editDayPlan = editDayPlan;
+window.deleteEditExercise = deleteEditExercise;
 
 window.showChart = function(type) {
     const modal = document.getElementById('chart-modal');

@@ -194,6 +194,15 @@
                         <button class="btn btn-secondary" onclick="showChart('age')">Ver Gráfica de Edad</button>
                     </div>
                 </div>
+
+                <div class="config-section">
+                    <h3>Plan de Ejercicios</h3>
+                    <p>Personaliza tu rutina semanal de ejercicios</p>
+                    <div class="plan-buttons">
+                        <button class="btn btn-secondary" onclick="switchTab('week')">Editar Plan Semanal</button>
+                        <button class="btn btn-secondary" id="reset-plan">Restaurar Plan Original</button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -220,6 +229,32 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="close-modal">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar plan de ejercicios -->
+    <div class="modal" id="edit-plan-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar plan de <span id="edit-day-name">Lunes</span></h3>
+                <button class="modal-close" onclick="closePlanModal()">×</button>
+            </div>
+            <div class="modal-body edit-plan-body">
+                <div class="input-group">
+                    <label for="edit-goal">Objetivo del día</label>
+                    <textarea id="edit-goal" placeholder="Describe el objetivo para este día..." rows="2"></textarea>
+                </div>
+                
+                <div class="exercises-section">
+                    <h4>Ejercicios</h4>
+                    <div id="edit-exercises-list"></div>
+                    <button class="btn btn-secondary" id="add-exercise-btn">+ Agregar Ejercicio</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="save-day-plan">Guardar Plan</button>
+                <button class="btn btn-secondary" onclick="closePlanModal()">Cancelar</button>
             </div>
         </div>
     </div>
