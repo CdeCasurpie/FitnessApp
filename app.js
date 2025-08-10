@@ -74,18 +74,42 @@ let appData = {
     exerciseProgress: {},
     userHistory: [],
     customWeeklyPlan: null, // Para almacenar el plan personalizado
-    editingDay: null // Para saber qué día se está editando
+    editingDay: null, // Para saber qué día se está editando
+    welcomeCompleted: false, // Nueva propiedad para controlar si ya se completó el welcome
+    userPreferences: {
+        goal: null,
+        level: null,
+        timeAvailable: null
+    }
 };
 
 // Variable global para manejar la instalación de PWA
 let deferredPrompt;
 
+// Variables para el formulario de bienvenida
+let currentStep = 0;
+let welcomeData = {
+    name: '',
+    age: '',
+    weight: '',
+    height: '',
+    goal: '',
+    level: '',
+    timeAvailable: ''
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     loadStoredData();
-    updateUserDisplay();
-    updateCurrentDay();
-    setupEventListeners();
-    registerServiceWorker();
+    
+    // Verificar si es la primera vez que se usa la app
+    if (!appData.welcomeCompleted) {
+        showWelcomeForm();
+    } else {
+        updateUserDisplay();
+        updateCurrentDay();
+        setupEventListeners();
+        registerServiceWorker();
+    }
 });
 
 function loadStoredData() {
@@ -987,6 +1011,306 @@ function installApp() {
             }
             deferredPrompt = null;
             hideInstallButton();
+        });
+    }
+}
+
+function showWelcomeForm() {
+    document.getElementById('welcome-overlay').classList.add('show');
+    setupWelcomeEventListeners();
+}
+
+function setupWelcomeEventListeners() {
+    const nextBtn = document.getElementById('next-step');
+    const prevBtn = document.getElementById('prev-step');
+    
+    // Botones de navegación
+    nextBtn.addEventListener('click', nextStep);
+    prevBtn.addEventListener('click', prevStep);
+    
+    // Opciones de objetivo
+    document.querySelectorAll('.goal-option').forEach(option => {
+        option.addEventListener('click', function() {
+            // Remover selección anterior
+            document.querySelectorAll('.goal-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            if (currentStep === 1) {
+                welcomeData.goal = this.dataset.goal;
+            } else if (currentStep === 3) {
+                welcomeData.timeAvailable = this.dataset.time;
+            }
+            
+            updateNextButton();
+        });
+    });
+    
+    // Opciones de nivel
+    document.querySelectorAll('.experience-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.experience-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            welcomeData.level = this.dataset.level;
+            updateNextButton();
+        });
+    });
+    
+    // Inputs de información personal
+    document.querySelectorAll('.welcome-input').forEach(input => {
+        input.addEventListener('input', function() {
+            welcomeData[this.id.replace('welcome-', '')] = this.value;
+            updateNextButton();
+        });
+        
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                nextStep();
+            }
+        });
+    });
+}
+
+function nextStep() {
+    if (!validateCurrentStep()) return;
+    
+    if (currentStep === 4) {
+        // Último paso - finalizar configuración
+        completeWelcomeSetup();
+        return;
+    }
+    
+    currentStep++;
+    updateWelcomeDisplay();
+}
+
+function prevStep() {
+    if (currentStep > 0) {
+        currentStep--;
+        updateWelcomeDisplay();
+    }
+}
+
+function updateWelcomeDisplay() {
+    // Actualizar indicadores de paso
+    document.querySelectorAll('.step-dot').forEach((dot, index) => {
+        dot.classList.remove('active', 'completed');
+        if (index < currentStep) {
+            dot.classList.add('completed');
+        } else if (index === currentStep) {
+            dot.classList.add('active');
+        }
+    });
+    
+    // Actualizar contenido de pasos
+    document.querySelectorAll('.step-content').forEach((content, index) => {
+        content.classList.remove('active');
+        if (index === currentStep) {
+            content.classList.add('active');
+        }
+    });
+    
+    // Actualizar botones
+    const prevBtn = document.getElementById('prev-step');
+    const nextBtn = document.getElementById('next-step');
+    
+    if (currentStep === 0) {
+        prevBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'block';
+    }
+    
+    if (currentStep === 4) {
+        nextBtn.textContent = 'Comenzar';
+        updateSummary();
+    } else {
+        nextBtn.textContent = 'Continuar';
+    }
+    
+    updateNextButton();
+}
+
+function validateCurrentStep() {
+    switch (currentStep) {
+        case 0:
+            return welcomeData.name && welcomeData.age && welcomeData.weight && welcomeData.height;
+        case 1:
+            return welcomeData.goal;
+        case 2:
+            return welcomeData.level;
+        case 3:
+            return welcomeData.timeAvailable;
+        case 4:
+            return true;
+        default:
+            return false;
+    }
+}
+
+function updateNextButton() {
+    const nextBtn = document.getElementById('next-step');
+    const isValid = validateCurrentStep();
+    
+    nextBtn.disabled = !isValid;
+    
+    if (isValid) {
+        nextBtn.classList.remove('disabled');
+    } else {
+        nextBtn.classList.add('disabled');
+    }
+}
+
+function updateSummary() {
+    const goalNames = {
+        'lose-weight': 'Perder peso',
+        'build-muscle': 'Ganar músculo',
+        'maintain': 'Mantener forma',
+        'tone': 'Tonificar'
+    };
+    
+    const levelNames = {
+        'beginner': 'Principiante',
+        'intermediate': 'Intermedio',
+        'advanced': 'Avanzado'
+    };
+    
+    document.getElementById('summary-name').textContent = welcomeData.name;
+    document.getElementById('summary-goal').textContent = goalNames[welcomeData.goal] || '-';
+    document.getElementById('summary-level').textContent = levelNames[welcomeData.level] || '-';
+    document.getElementById('summary-time').textContent = welcomeData.timeAvailable + ' minutos';
+    
+    // Calcular BMR con los datos del welcome
+    const bmr = Math.round((10 * parseFloat(welcomeData.weight)) + (6.25 * parseFloat(welcomeData.height)) - (5 * parseFloat(welcomeData.age)) + 5);
+    document.getElementById('summary-bmr').textContent = bmr + ' kcal';
+}
+
+function completeWelcomeSetup() {
+    // Guardar datos del usuario
+    appData.userInfo = {
+        name: welcomeData.name,
+        weight: parseFloat(welcomeData.weight),
+        height: parseInt(welcomeData.height),
+        age: parseInt(welcomeData.age)
+    };
+    
+    appData.userPreferences = {
+        goal: welcomeData.goal,
+        level: welcomeData.level,
+        timeAvailable: parseInt(welcomeData.timeAvailable)
+    };
+    
+    appData.welcomeCompleted = true;
+    
+    // Personalizar plan de ejercicios basado en preferencias
+    customizeWorkoutPlan();
+    
+    // Guardar datos
+    saveData();
+    
+    // Ocultar formulario de bienvenida
+    document.getElementById('welcome-overlay').classList.remove('show');
+    
+    // Inicializar la aplicación
+    updateUserDisplay();
+    updateCurrentDay();
+    setupEventListeners();
+    registerServiceWorker();
+    
+    // Mostrar mensaje de bienvenida
+    setTimeout(() => {
+        showSuccessMessage(`¡Bienvenido ${welcomeData.name}! Tu plan personalizado está listo.`);
+    }, 500);
+}
+
+function customizeWorkoutPlan() {
+    const { goal, level, timeAvailable } = appData.userPreferences;
+    
+    // Usar el generador de rutinas personalizado
+    if (typeof workoutGenerator !== 'undefined') {
+        const generatedPlan = workoutGenerator.generateCustomPlan(appData.userPreferences);
+        
+        // Reemplazar el plan actual con el generado
+        Object.keys(generatedPlan).forEach(day => {
+            weeklyPlan[day] = generatedPlan[day];
+        });
+        
+        console.log('Plan personalizado generado:', generatedPlan);
+    } else {
+        // Fallback: usar el método anterior si el generador no está disponible
+        console.warn('Generador de rutinas no disponible, usando método básico');
+        
+        // Ajustar intensidad según nivel
+        let intensityMultiplier = 1;
+        switch (level) {
+            case 'beginner':
+                intensityMultiplier = 0.7;
+                break;
+            case 'intermediate':
+                intensityMultiplier = 1;
+                break;
+            case 'advanced':
+                intensityMultiplier = 1.3;
+                break;
+        }
+        
+        // Ajustar duración según tiempo disponible
+        let timeMultiplier = 1;
+        switch (timeAvailable) {
+            case 15:
+                timeMultiplier = 0.6;
+                break;
+            case 30:
+                timeMultiplier = 1;
+                break;
+            case 60:
+                timeMultiplier = 1.5;
+                break;
+        }
+        
+        // Personalizar planes según objetivo (método básico anterior)
+        Object.keys(weeklyPlan).forEach(day => {
+            const dayPlan = weeklyPlan[day];
+            
+            // Ajustar ejercicios según objetivo
+            dayPlan.exercises = dayPlan.exercises.map(exercise => {
+                let newExercise = { ...exercise };
+                
+                // Ajustar calorías según intensidad y tiempo
+                newExercise.calories = Math.round(exercise.calories * intensityMultiplier * timeMultiplier);
+                
+                // Ajustar duración/sets según tiempo disponible
+                if (exercise.duration) {
+                    const minutes = parseInt(exercise.duration.match(/\d+/)[0]);
+                    const newMinutes = Math.round(minutes * timeMultiplier);
+                    newExercise.duration = exercise.duration.replace(/\d+/, newMinutes);
+                } else if (exercise.sets) {
+                    const sets = parseInt(exercise.sets.match(/\d+/)[0]);
+                    const reps = parseInt(exercise.sets.match(/x(\d+)/)[1]);
+                    const newSets = Math.max(1, Math.round(sets * timeMultiplier));
+                    const newReps = Math.max(5, Math.round(reps * intensityMultiplier));
+                    newExercise.sets = `${newSets}x${newReps}`;
+                }
+                
+                return newExercise;
+            });
+            
+            // Ajustar objetivo del día según meta del usuario
+            switch (goal) {
+                case 'lose-weight':
+                    dayPlan.goal = dayPlan.goal.replace(/déficit/g, 'déficit calórico fuerte').replace(/quemar/g, 'quemar grasa');
+                    break;
+                case 'build-muscle':
+                    dayPlan.goal = dayPlan.goal.replace(/déficit/g, 'ganancia muscular').replace(/cardio/g, 'fuerza');
+                    break;
+                case 'maintain':
+                    dayPlan.goal = dayPlan.goal.replace(/déficit/g, 'mantenimiento').replace(/fuerte/g, 'moderado');
+                    break;
+                case 'tone':
+                    dayPlan.goal = dayPlan.goal.replace(/déficit/g, 'tonificación').replace(/quemar/g, 'definir');
+                    break;
+            }
+            
+            // Recalcular total de calorías del día
+            dayPlan.totalExercise = dayPlan.exercises.reduce((total, ex) => total + ex.calories, 0);
         });
     }
 }

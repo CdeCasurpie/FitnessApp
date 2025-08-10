@@ -259,6 +259,160 @@
         </div>
     </div>
 
+    <!-- Welcome Form Overlay -->
+    <div class="welcome-overlay" id="welcome-overlay">
+        <div class="welcome-container">
+            <div class="welcome-header">
+                <div class="welcome-icon">💪</div>
+                <h1 class="welcome-title">¡Bienvenido!</h1>
+                <p class="welcome-subtitle">Configuremos tu plan fitness personalizado</p>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step-dot active" data-step="0"></div>
+                <div class="step-dot" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+            </div>
+            
+            <div class="welcome-content">
+                <!-- Paso 1: Información Personal -->
+                <div class="step-content active" data-step="0">
+                    <h2 class="step-title">Cuéntanos sobre ti</h2>
+                    <p class="step-description">Esta información nos ayudará a calcular tus necesidades calóricas y crear un plan personalizado.</p>
+                    
+                    <div class="welcome-form">
+                        <div class="welcome-input-group">
+                            <label for="welcome-name">¿Cómo te llamas?</label>
+                            <input type="text" id="welcome-name" class="welcome-input" placeholder="Tu nombre">
+                        </div>
+                        <div class="welcome-input-group">
+                            <label for="welcome-age">¿Cuántos años tienes?</label>
+                            <input type="number" id="welcome-age" class="welcome-input" placeholder="Edad" min="13" max="100">
+                        </div>
+                        <div class="welcome-input-group">
+                            <label for="welcome-weight">¿Cuál es tu peso? (kg)</label>
+                            <input type="number" id="welcome-weight" class="welcome-input" placeholder="Peso en kg" step="0.1" min="30" max="200">
+                        </div>
+                        <div class="welcome-input-group">
+                            <label for="welcome-height">¿Cuál es tu altura? (cm)</label>
+                            <input type="number" id="welcome-height" class="welcome-input" placeholder="Altura en cm" min="120" max="220">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 2: Objetivo -->
+                <div class="step-content" data-step="1">
+                    <h2 class="step-title">¿Cuál es tu objetivo?</h2>
+                    <p class="step-description">Selecciona tu meta principal para que podamos ajustar tu plan de ejercicios.</p>
+                    
+                    <div class="goal-options">
+                        <div class="goal-option" data-goal="lose-weight">
+                            <div class="goal-option-title">🔥 Perder peso</div>
+                            <p class="goal-option-desc">Quemar grasa y reducir peso corporal con ejercicios cardiovasculares y déficit calórico.</p>
+                        </div>
+                        <div class="goal-option" data-goal="build-muscle">
+                            <div class="goal-option-title">💪 Ganar músculo</div>
+                            <p class="goal-option-desc">Aumentar masa muscular con ejercicios de fuerza y superávit calórico controlado.</p>
+                        </div>
+                        <div class="goal-option" data-goal="maintain">
+                            <div class="goal-option-title">⚖️ Mantener forma</div>
+                            <p class="goal-option-desc">Mantener peso actual y mejorar condición física general con ejercicios variados.</p>
+                        </div>
+                        <div class="goal-option" data-goal="tone">
+                            <div class="goal-option-title">✨ Tonificar</div>
+                            <p class="goal-option-desc">Definir músculos y mejorar composición corporal con ejercicios funcionales.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 3: Nivel de experiencia -->
+                <div class="step-content" data-step="2">
+                    <h2 class="step-title">¿Cuál es tu nivel?</h2>
+                    <p class="step-description">Esto nos ayudará a ajustar la intensidad de los ejercicios a tu capacidad actual.</p>
+                    
+                    <div class="experience-levels">
+                        <div class="experience-option" data-level="beginner">
+                            <div class="experience-icon">🌱</div>
+                            <div class="experience-title">Principiante</div>
+                            <p class="experience-desc">Nuevo en el ejercicio o menos de 6 meses de experiencia</p>
+                        </div>
+                        <div class="experience-option" data-level="intermediate">
+                            <div class="experience-icon">🏃</div>
+                            <div class="experience-title">Intermedio</div>
+                            <p class="experience-desc">6 meses a 2 años de experiencia ejercitándome regularmente</p>
+                        </div>
+                        <div class="experience-option" data-level="advanced">
+                            <div class="experience-icon">🏆</div>
+                            <div class="experience-title">Avanzado</div>
+                            <p class="experience-desc">Más de 2 años de experiencia con rutinas establecidas</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 4: Tiempo disponible -->
+                <div class="step-content" data-step="3">
+                    <h2 class="step-title">¿Cuánto tiempo tienes?</h2>
+                    <p class="step-description">Ajustaremos la duración de tus entrenamientos según tu disponibilidad.</p>
+                    
+                    <div class="goal-options">
+                        <div class="goal-option" data-time="15">
+                            <div class="goal-option-title">⚡ 15-20 minutos</div>
+                            <p class="goal-option-desc">Entrenamientos cortos e intensos, perfectos para días ocupados.</p>
+                        </div>
+                        <div class="goal-option" data-time="30">
+                            <div class="goal-option-title">🎯 30-40 minutos</div>
+                            <p class="goal-option-desc">Duración ideal para un entrenamiento completo y efectivo.</p>
+                        </div>
+                        <div class="goal-option" data-time="60">
+                            <div class="goal-option-title">🔥 60+ minutos</div>
+                            <p class="goal-option-desc">Entrenamientos extensos para máximos resultados.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 5: Resumen y confirmación -->
+                <div class="step-content" data-step="4">
+                    <div class="completion-animation">
+                        <div class="completion-icon">🎉</div>
+                        <h2 class="completion-title">¡Todo listo!</h2>
+                        <p class="completion-message">Hemos creado tu plan personalizado basado en tus objetivos y preferencias.</p>
+                        
+                        <div class="summary-card">
+                            <div class="summary-row">
+                                <span class="summary-label">Nombre:</span>
+                                <span class="summary-value" id="summary-name">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Objetivo:</span>
+                                <span class="summary-value" id="summary-goal">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Nivel:</span>
+                                <span class="summary-value" id="summary-level">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Tiempo por sesión:</span>
+                                <span class="summary-value" id="summary-time">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">BMR estimado:</span>
+                                <span class="summary-value" id="summary-bmr">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="welcome-actions">
+                    <button class="btn-welcome btn-welcome-secondary" id="prev-step" style="display: none;">Anterior</button>
+                    <button class="btn-welcome btn-welcome-primary" id="next-step">Continuar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="workout-generator.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
